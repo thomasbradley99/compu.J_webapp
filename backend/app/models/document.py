@@ -24,4 +24,8 @@ class Document(Base):
     # Optional fields
     title = Column(String, nullable=True)
     description = Column(String, nullable=True)
-    tags = Column(JSON, nullable=True)  # Store as JSON array 
+    tags = Column(JSON, nullable=True)  # Store as JSON array
+    
+    # Add these new fields
+    token_count = Column(Integer, nullable=True)
+    num_chunks = Column(Integer, nullable=True) 

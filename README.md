@@ -1,6 +1,47 @@
-# A1 Smart Doc Classifier
+# Smart Doc Classifier
 
-A modern web application that automatically classifies documents into predefined categories using machine learning. Built with Node.js, React, and PostgreSQL.
+A modern web application that automatically classifies documents using AI. Built with FastAPI, React, and PostgreSQL.
+
+## ✨ Current Features
+
+### 🚀 Core Functionality
+- **Smart Upload System**
+  - Drag-and-drop interface
+  - Multi-file upload support
+  - Supports TXT, PDF, and DOCX files
+  - Real-time upload status feedback
+
+- **AI-Powered Classification**
+  - Uses BART model for zero-shot classification
+  - 6 document categories (Technical, Business, Legal, Academic, General, Other)
+  - Confidence scoring for each classification
+  - Batch processing capability
+
+- **Interactive Dashboard**
+  - Total document count
+  - Category distribution visualization
+  - Most common document types
+  - Average documents per category
+  - Auto-refreshing stats (30-second intervals)
+
+- **Document History**
+  - Complete upload history
+  - Classification results
+  - Confidence scores
+  - Upload timestamps
+
+### 💻 Technical Features
+- FastAPI backend with SQLAlchemy ORM
+- React frontend with Tailwind CSS
+- PostgreSQL database
+- Real-time error handling
+- Responsive design
+
+## 🔄 Auto-Updating Statistics
+- Live document count
+- Category distribution
+- Confidence level indicators
+- Processing status updates
 
 ## Project Overview
 

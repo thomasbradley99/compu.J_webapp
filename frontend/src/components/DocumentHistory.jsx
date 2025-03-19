@@ -33,31 +33,26 @@ function DocumentHistory() {
     }
 
     return (
-        <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">Document History</h2>
+        <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4">Document History</h2>
             {error && <div className="text-red-500 mb-4">{error}</div>}
-            <div className="w-full overflow-x-auto shadow rounded-lg">
-                <table className="min-w-full table-auto">
+            <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Filename
-                            </th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Category
-                            </th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Confidence
-                            </th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Upload Date
-                            </th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Filename</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Category</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Confidence</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Size</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Tokens</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Chunks</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Upload Date</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {documents.length === 0 ? (
                             <tr>
-                                <td colSpan="4" className="px-4 py-2 text-center text-gray-500">
+                                <td colSpan="7" className="px-4 py-2 text-center text-gray-500">
                                     No documents found
                                 </td>
                             </tr>
@@ -70,6 +65,15 @@ function DocumentHistory() {
                                     <td className="px-4 py-2">{doc.predicted_category}</td>
                                     <td className="px-4 py-2">
                                         {(doc.confidence_score * 100).toFixed(1)}%
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        {(doc.file_size / 1024).toFixed(1)} KB
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        {doc.token_count || 'N/A'}
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        {doc.num_chunks || '1'}
                                     </td>
                                     <td className="px-4 py-2 whitespace-nowrap">
                                         {new Date(doc.created_at).toLocaleString()}

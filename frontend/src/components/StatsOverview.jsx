@@ -16,7 +16,8 @@ const COLORS = {
 const StatsOverview = () => {
   const [stats, setStats] = useState({
     total_documents: 0,
-    category_distribution: {}
+    category_distribution: {},
+    documents: []
   });
 
   useEffect(() => {
@@ -26,11 +27,12 @@ const StatsOverview = () => {
         setStats(response.data);
       } catch (error) {
         console.error('Error fetching stats:', error);
-        // Fallback to fetching documents
+        // Fallback to fetching documents directly
         try {
           const docsResponse = await axios.get(`${API_URL}/documents`);
           const documents = docsResponse.data;
           
+          // Calculate stats from documents
           const distribution = documents.reduce((acc, doc) => {
             acc[doc.predicted_category] = (acc[doc.predicted_category] || 0) + 1;
             return acc;
@@ -38,7 +40,8 @@ const StatsOverview = () => {
 
           setStats({
             total_documents: documents.length,
-            category_distribution: distribution
+            category_distribution: distribution,
+            documents: documents
           });
         } catch (fallbackError) {
           console.error('Error fetching documents:', fallbackError);
@@ -52,6 +55,26 @@ const StatsOverview = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const getMostCommonCategory = () => {
+    return Object.entries(stats.category_distribution)
+      .sort(([,a], [,b]) => b - a)[0]?.[0] || 'N/A';
+  };
+
+  const getAverageFileSize = () => {
+    if (!stats.documents.length) return '0 KB';
+    const avgSize = stats.documents.reduce((acc, doc) => acc + doc.file_size, 0) / stats.documents.length;
+    return `${(avgSize / 1024).toFixed(1)} KB`;
+  };
+
+  const getHighConfidenceCount = () => {
+    const highConfDocs = stats.documents.filter(doc => doc.confidence_score >= 0.5);
+    return {
+      count: highConfDocs.length,
+      percentage: stats.documents.length ? 
+        ((highConfDocs.length / stats.documents.length) * 100).toFixed(0) : 0
+    };
+  };
+
   // Transform category distribution for PieChart
   const chartData = Object.entries(stats.category_distribution).map(([name, value]) => ({
     name,
@@ -60,28 +83,30 @@ const StatsOverview = () => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      {/* Stats Cards in a single row */}
       <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
+        {/* Total Documents */}
         <div className="bg-blue-50 p-4 rounded-lg min-w-[200px]">
           <h3 className="text-lg font-semibold text-blue-800">Total Documents</h3>
           <p className="text-3xl font-bold text-blue-600">{stats.total_documents}</p>
         </div>
         
+        {/* Most Common Category */}
         <div className="bg-green-50 p-4 rounded-lg min-w-[200px]">
           <h3 className="text-lg font-semibold text-green-800">Most Common</h3>
-          <p className="text-xl font-bold text-green-600">
-            {Object.entries(stats.category_distribution)
-              .sort(([,a], [,b]) => b - a)[0]?.[0] || 'N/A'}
-          </p>
+          <p className="text-xl font-bold text-green-600">{getMostCommonCategory()}</p>
         </div>
 
+        {/* Average File Size */}
         <div className="bg-purple-50 p-4 rounded-lg min-w-[200px]">
-          <h3 className="text-lg font-semibold text-purple-800">Avg per Category</h3>
-          <p className="text-3xl font-bold text-purple-600">
-            {stats.total_documents > 0 
-              ? (stats.total_documents / Object.keys(stats.category_distribution).length).toFixed(1) 
-              : '0'}
-          </p>
+          <h3 className="text-lg font-semibold text-purple-800">Avg File Size</h3>
+          <p className="text-3xl font-bold text-purple-600">{getAverageFileSize()}</p>
+        </div>
+
+        {/* High Confidence Docs */}
+        <div className="bg-yellow-50 p-4 rounded-lg min-w-[200px]">
+          <h3 className="text-lg font-semibold text-yellow-800">High Confidence</h3>
+          <p className="text-3xl font-bold text-yellow-600">{getHighConfidenceCount().count}</p>
+          <p className="text-sm text-yellow-600">({getHighConfidenceCount().percentage}%)</p>
         </div>
       </div>
 

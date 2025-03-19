@@ -9,6 +9,8 @@ CREATE TABLE documents (
     predicted_category VARCHAR(100) NOT NULL,
     confidence_score FLOAT NOT NULL,
     category_scores JSONB NOT NULL,
+    token_count INTEGER,
+    num_chunks INTEGER,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE,
     title VARCHAR(255),

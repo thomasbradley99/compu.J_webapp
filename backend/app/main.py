@@ -71,7 +71,9 @@ async def classify_document(
             file_size=len(content),
             predicted_category=result["predicted_category"],
             confidence_score=result["confidence_score"],
-            category_scores=result["category_scores"]
+            category_scores=result["category_scores"],
+            token_count=result.get("token_count"),
+            num_chunks=result.get("num_chunks")
         )
         db.add(document)
         db.commit()
@@ -128,7 +130,9 @@ async def classify_documents(
                 file_size=len(content),
                 predicted_category=result["predicted_category"],
                 confidence_score=result["confidence_score"],
-                category_scores=result["category_scores"]
+                category_scores=result["category_scores"],
+                token_count=result.get("token_count"),
+                num_chunks=result.get("num_chunks")
             )
             db.add(document)
             db.commit()
@@ -181,32 +185,31 @@ def get_document(
         )
     return document
 
-@app.get("/api/v1/documents/stats")
+@app.get("/api/stats")
 async def get_document_stats(db: Session = Depends(get_db)):
     try:
         # Get total documents
         total_documents = db.query(Document).count()
         
-        # Get category distribution
-        category_distribution = (
-            db.query(
-                Document.predicted_category,
-                func.count(Document.id).label('count')
-            )
-            .group_by(Document.predicted_category)
-            .all()
-        )
+        # Get category distribution and additional stats
+        documents = db.query(Document).all()
         
-        # Convert to dictionary
-        distribution_dict = {
-            category: count 
-            for category, count in category_distribution
-        }
+        # Calculate category distribution
+        category_distribution = {}
+        for doc in documents:
+            category_distribution[doc.predicted_category] = category_distribution.get(doc.predicted_category, 0) + 1
         
         return {
             "total_documents": total_documents,
-            "category_distribution": distribution_dict,
-            "last_updated": datetime.now(timezone.utc).isoformat()
+            "category_distribution": category_distribution,
+            "documents": [
+                {
+                    "confidence_score": doc.confidence_score,
+                    "file_size": doc.file_size,
+                    "token_count": doc.token_count,
+                    "num_chunks": doc.num_chunks
+                } for doc in documents
+            ]
         }
         
     except Exception as e:
