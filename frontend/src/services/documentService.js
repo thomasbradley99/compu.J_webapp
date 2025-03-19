@@ -14,10 +14,25 @@ export const uploadDocument = async (files) => {
     
     try {
         const response = await axios.post(`${API_URL}/classify-batch`, formData);
+        
+        // Add response validation
+        if (!response.data || !Array.isArray(response.data)) {
+            throw new Error('Invalid response format from server');
+        }
+        
         return response.data;
     } catch (error) {
         console.error('Error uploading documents:', error);
-        throw error;
+        if (error.response) {
+            // Server responded with an error
+            throw new Error(error.response.data.detail || 'Server error');
+        } else if (error.request) {
+            // Request made but no response
+            throw new Error('No response from server');
+        } else {
+            // Something else went wrong
+            throw new Error('Failed to upload documents');
+        }
     }
 };
 

@@ -1,3 +1,7 @@
+DROP DATABASE IF EXISTS doc_classifier;
+CREATE DATABASE doc_classifier;
+\c doc_classifier
+
 DROP TABLE IF EXISTS documents;
 CREATE TABLE documents (
     id SERIAL PRIMARY KEY,

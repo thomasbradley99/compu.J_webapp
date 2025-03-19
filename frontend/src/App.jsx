@@ -16,9 +16,13 @@ function App() {
     setError(null);
     try {
       const response = await uploadDocument(acceptedFiles);
+      if (!Array.isArray(response)) {
+        throw new Error('Invalid response format');
+      }
       setResults(response);
     } catch (err) {
-      setError('Failed to process documents');
+      console.error('Upload error:', err);
+      setError(err.message || 'Failed to process documents');
     } finally {
       setLoading(false);
     }
@@ -36,11 +40,24 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
+      {/* Updated Header */}
+      <header className="bg-white border-b">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">Smart Doc Classifier</h1>
-          <p className="text-gray-500 mt-1">Automatically classify your documents using AI</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
+                DocAnalyze AI
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Intelligent Document Classification & Analysis
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
+                Powered by BART ML
+              </span>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -78,9 +95,16 @@ function App() {
             </div>
           </div>
 
-          {/* Processing Status & Results */}
+          {/* Error Display */}
+          {error && (
+            <div className="mt-4 bg-red-50 text-red-700 p-4 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {/* Loading State */}
           {loading && (
-            <div className="bg-blue-50 text-blue-700 p-4 rounded-lg mb-8 flex items-center justify-center">
+            <div className="mt-4 bg-blue-50 text-blue-700 p-4 rounded-lg flex items-center justify-center">
               <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -89,15 +113,10 @@ function App() {
             </div>
           )}
 
-          {error && (
-            <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-8">
-              {error}
-            </div>
-          )}
-
-          {results.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-              <h2 className="text-xl font-semibold mb-6">Classification Results</h2>
+          {/* Results Display - Add null check */}
+          {!loading && results && results.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold mb-4">Classification Results</h2>
               <div className="grid grid-cols-1 gap-4">
                 {results.map((result, index) => (
                   <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -124,7 +143,11 @@ function App() {
                             <span className="text-sm text-gray-500">Confidence</span>
                             <ConfidenceIndicator 
                               score={result.confidence_score} 
-                              level={result.confidence_level} 
+                              level={
+                                result.confidence_score >= 0.75 ? 'high' :
+                                result.confidence_score >= 0.50 ? 'medium' :
+                                'low'
+                              }
                             />
                           </div>
 

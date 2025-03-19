@@ -206,4 +206,19 @@ CLIENT_URL=http://localhost:3002
 
 ## License
 
-MIT License 
+MIT License
+
+## Model Choice Justification
+
+We chose the BART-large-MNLI model for several reasons:
+1. Zero-shot capabilities without training
+2. Good performance on text classification tasks
+3. Reasonable inference speed on CPU
+
+Trade-offs considered:
+- Speed vs Accuracy: BART offers good accuracy but slower inference
+- Resource Usage: Requires ~2GB RAM, but manageable on most systems
+- Alternative Models:
+  - DeBERTa: Higher accuracy but slower
+  - DistilBERT: Faster but less accurate
+  - TF-IDF + LogReg: Fastest but requires training data 

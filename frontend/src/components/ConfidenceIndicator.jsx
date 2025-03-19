@@ -1,31 +1,44 @@
+import React from 'react';
+
 const ConfidenceIndicator = ({ score, level }) => {
-  const colors = {
+  // Default to 'low' if level is undefined
+  const confidenceLevel = level || (
+    score >= 0.75 ? 'high' :
+    score >= 0.50 ? 'medium' : 
+    'low'
+  );
+
+  const styles = {
     high: {
-      bg: "bg-green-500",
-      text: "text-green-700",
-      light: "bg-green-100"
+      bg: 'bg-green-100',
+      text: 'text-green-800',
+      border: 'border-green-200'
     },
     medium: {
-      bg: "bg-yellow-500",
-      text: "text-yellow-700",
-      light: "bg-yellow-100"
+      bg: 'bg-yellow-100',
+      text: 'text-yellow-800',
+      border: 'border-yellow-200'
     },
     low: {
-      bg: "bg-red-500",
-      text: "text-red-700",
-      light: "bg-red-100"
+      bg: 'bg-red-100',
+      text: 'text-red-800',
+      border: 'border-red-200'
     }
   };
 
+  // Add safety check for styles
+  const style = styles[confidenceLevel] || styles.low;
+
   return (
-    <div className="flex items-center space-x-2">
-      <div className={`flex-shrink-0 w-2 h-2 rounded-full ${colors[level].bg}`} />
-      <div className={`text-sm flex flex-wrap items-center ${colors[level].text}`}>
-        <span className="font-medium">{(score * 100).toFixed(1)}%</span>
-        <div className={`ml-2 px-2 py-0.5 rounded-full ${colors[level].light} text-xs`}>
-          {level.charAt(0).toUpperCase() + level.slice(1)} confidence
-        </div>
+    <div className="flex items-center">
+      <div className={`px-2 py-1 rounded-full ${style.bg} ${style.text} ${style.border} text-sm font-medium`}>
+        {(score * 100).toFixed(1)}%
       </div>
+      {confidenceLevel === 'low' && (
+        <span className="ml-2 text-red-600 text-sm">
+          Low confidence
+        </span>
+      )}
     </div>
   );
 };

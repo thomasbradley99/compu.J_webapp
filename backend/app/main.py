@@ -37,30 +37,59 @@ async def classify_document(
     db: Session = Depends(get_db)
 ):
     try:
-        # Create uploads directory if it doesn't exist
-        os.makedirs("uploads", exist_ok=True)
-        
-        # Validate file extension
+        # Validate file size
+        content = await file.read()
+        if len(content) > settings.MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "File too large",
+                    "max_size": f"{settings.MAX_FILE_SIZE/1024/1024}MB",
+                    "received_size": f"{len(content)/1024/1024}MB"
+                }
+            )
+            
+        # Enhanced file validation
         file_extension = os.path.splitext(file.filename)[1].lower()
         if file_extension not in settings.ALLOWED_EXTENSIONS:
             raise HTTPException(
-                status_code=400, 
-                detail=f"Unsupported file type. Allowed types: {', '.join(settings.ALLOWED_EXTENSIONS)}"
+                status_code=415,
+                detail={
+                    "error": "Unsupported file type",
+                    "allowed_types": settings.ALLOWED_EXTENSIONS,
+                    "received_type": file_extension
+                }
             )
+            
+        # Process document with enhanced error handling
+        try:
+            text_content = DocumentProcessor.process_document(file_path)
+        except UnicodeDecodeError:
+            raise HTTPException(
+                status_code=422,
+                detail="File encoding not supported. Please ensure the file is properly encoded (UTF-8 recommended)."
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Failed to process document: {str(e)}"
+            )
+
+        # Validate file content
+        if not text_content or len(text_content.strip()) == 0:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "Invalid document content",
+                    "reason": "Document appears to be empty or corrupted"
+                }
+            )
+
+        # Extract text from the document
+        text = await process_document_content(content, file.filename)
         
-        # Save uploaded file
-        file_path = f"uploads/{uuid.uuid4()}{file_extension}"
-        with open(file_path, "wb") as buffer:
-            content = await file.read()
-            buffer.write(content)
-
-        # Process document using the appropriate method
-        text_content = DocumentProcessor.process_document(file_path)
-        if not text_content:
-            raise HTTPException(status_code=400, detail="Failed to process document")
-
-        # Classify document
-        result = classifier.classify_document(text_content)
+        # Get classification results
+        result = classifier.classify_document(text, file.filename)
 
         # Save to database
         document = Document(
@@ -119,7 +148,7 @@ async def classify_documents(
                 })
                 continue
 
-            result = classifier.classify_document(text_content)
+            result = classifier.classify_document(text_content, file.filename)
             
             # Save to database
             document = Document(
