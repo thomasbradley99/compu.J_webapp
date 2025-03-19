@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from typing import List
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
+from sqlalchemy import func
 
 from app.core.config import settings
 from app.db.session import get_db
@@ -180,18 +181,34 @@ def get_document(
         )
     return document
 
-@app.get(f"{settings.API_V1_STR}/documents/stats")
-def get_document_stats(db: Session = Depends(get_db)):
-    """
-    Get statistics about classified documents.
-    """
-    total_documents = db.query(Document).count()
-    category_counts = db.query(
-        Document.predicted_category,
-        func.count(Document.id)
-    ).group_by(Document.predicted_category).all()
-    
-    return {
-        "total_documents": total_documents,
-        "category_distribution": dict(category_counts)
-    } 
+@app.get("/api/v1/documents/stats")
+async def get_document_stats(db: Session = Depends(get_db)):
+    try:
+        # Get total documents
+        total_documents = db.query(Document).count()
+        
+        # Get category distribution
+        category_distribution = (
+            db.query(
+                Document.predicted_category,
+                func.count(Document.id).label('count')
+            )
+            .group_by(Document.predicted_category)
+            .all()
+        )
+        
+        # Convert to dictionary
+        distribution_dict = {
+            category: count 
+            for category, count in category_distribution
+        }
+        
+        return {
+            "total_documents": total_documents,
+            "category_distribution": distribution_dict,
+            "last_updated": datetime.now(timezone.utc).isoformat()
+        }
+        
+    except Exception as e:
+        print(f"Error fetching stats: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch document statistics") 
