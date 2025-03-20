@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-multipart
+transformers
+torch
+pydantic
+pydantic-settings
+python-docx
+PyPDF2
+python-jose
+passlib
+bcrypt

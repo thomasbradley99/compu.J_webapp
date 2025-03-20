@@ -6,6 +6,9 @@ A modern web application that automatically classifies documents using AI. Built
 
 Smart Doc Classifier uses zero-shot classification to automatically categorize documents into predefined categories. It uses the BART-large-MNLI model for intelligent classification while incorporating feature-based adjustments for improved accuracy.
 
+### Important Note
+On first run, the application will automatically download the BART-large-MNLI model (approximately 1.6GB). This is a one-time download and no authentication token is required.
+
 ### Why BART-large-MNLI?
 - **Zero-shot Capabilities**: No training data required
 - **Robust Performance**: Strong accuracy across diverse document types
