@@ -16,7 +16,7 @@ class DocumentClassifier:
         )
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         self.categories = settings.CLASSIFICATION_CATEGORIES
-        
+
         # Adjust hypothesis templates to be more specific
         self.hypothesis_templates = {
             "Technical Documentation": "This text is {} that explains how to use or implement technical systems",
@@ -164,69 +164,44 @@ class DocumentClassifier:
         num_chunks = len(chunks)
         
         # Initial classification
-        results = []
-        for category in self.categories:
-            result = self.model(
-                text[:512],
-                candidate_labels=[category],
-                hypothesis_template=self.hypothesis_templates[category],
-                multi_label=False
-            )
-            results.append((category, result["scores"][0]))
+        result = self.model(
+            text[:512],
+            candidate_labels=self.categories,
+            hypothesis_template="This text is {}",
+            multi_label=True
+        )
         
-        scores = dict(results)
+        scores = dict(zip(result["labels"], result["scores"]))
         
-        # Adjust scores based on features
+        # Adjust scores based on features and content
         if features["has_technical_title"] or features["code_indicators"] > 2:
             scores["Technical Documentation"] *= 1.8
-            scores["Legal Document"] *= 0.7  # Reduce legal bias for technical content
+            scores["Business Proposal"] *= 0.6
         
         if features["is_first_person"] or features["has_question"]:
             scores["General Article"] *= 2.0
-            scores["Legal Document"] *= 0.5  # Significantly reduce legal bias for article-like content
+            scores["Business Proposal"] *= 0.5
         
         if features["legal_indicators"] > 2:
-            scores["Legal Document"] *= 1.5  # Only boost legal if strong indicators
+            scores["Legal Document"] *= 1.5
         
         if features["academic_indicators"] > 2:
-            scores["Academic Paper"] *= 1.8
-            scores["Legal Document"] *= 0.7
+            scores["Academic Paper"] *= 1.5
+            scores["Business Proposal"] *= 0.6
         
-        # Check for article indicators in title
-        title_words = filename.lower().split()
-        if any(word in ["how", "why", "what", "when", "blog", "opinion"] for word in title_words):
-            scores["General Article"] *= 2.0
-            scores["Legal Document"] *= 0.4
+        # Check for poetry (short lines, regular structure)
+        lines = text.split('\n')
+        avg_line_length = sum(len(line.strip()) for line in lines if line.strip()) / max(1, len([l for l in lines if l.strip()]))
+        if avg_line_length < 40 and len(lines) > 4:
+            scores["Other"] *= 2.0
+            scores["General Article"] *= 0.5
+            scores["Business Proposal"] *= 0.4
         
-        # Add specific adjustments for marketing content
-        first_paragraph = text.split('\n\n')[0].lower()
-        if any(indicator in first_paragraph.lower() for indicator in [
-            "revolutionize", "transform", "are you", "introducing", "discover"
-        ]):
-            scores["Business Proposal"] *= 2.0
-            scores["Academic Paper"] *= 0.5
-
-        # Stronger boost for first-person articles
-        if "how i" in filename.lower() or "why i" in filename.lower():
-            scores["General Article"] *= 2.5
-            scores["Academic Paper"] *= 0.3
-            scores["Technical Documentation"] *= 0.7
-
-        # Handle mixed-content documents
-        content_indicators = {
-            "technical": ["implementation", "system", "algorithm"],
-            "business": ["proposal", "opportunity", "market"],
-            "academic": ["research", "study", "analysis"],
-            "legal": ["compliance", "regulation", "policy"]
-        }
+        # Check for marketing language
+        marketing_phrases = ["revolutionize", "transform", "are you tired of", "introducing"]
+        if any(phrase in text.lower() for phrase in marketing_phrases):
+            scores["Business Proposal"] *= 1.5
         
-        indicator_counts = {k: sum(1 for ind in v if ind in text.lower()) 
-                          for k, v in content_indicators.items()}
-        
-        if sum(count > 2 for count in indicator_counts.values()) >= 3:
-            # If document has significant indicators from 3+ categories
-            scores["Other"] *= 1.5
-
         # Normalize scores
         total = sum(scores.values())
         normalized_scores = {k: v/total for k, v in scores.items()}
@@ -292,4 +267,28 @@ class DocumentClassifier:
                     reverse=True
                 )[:2]
             }
-        return None 
+        return None
+
+    def detect_poetry(self, text: str) -> bool:
+        """Detect if text is likely poetry"""
+        lines = text.split('\n')
+        # Check for consistent short lines and regular structure
+        if len(lines) > 4:
+            avg_line_length = sum(len(line.strip()) for line in lines) / len(lines)
+            return avg_line_length < 40 and any(',' in text or '.' in text)
+        return False
+
+    def detect_prose(self, text: str) -> bool:
+        """Detect if text is creative prose"""
+        # Look for narrative indicators
+        narrative_words = ["tale", "story", "narrative", "chapter", "novel"]
+        return any(word in text.lower() for word in narrative_words)
+
+    def detect_marketing(self, text: str) -> bool:
+        """Detect marketing content"""
+        marketing_phrases = [
+            "revolutionize", "transform", "are you tired of",
+            "introducing", "groundbreaking", "life-altering",
+            "prepare to be amazed", "don't miss your chance"
+        ]
+        return any(phrase in text.lower() for phrase in marketing_phrases) 

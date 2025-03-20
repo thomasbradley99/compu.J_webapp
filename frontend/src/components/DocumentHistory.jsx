@@ -63,7 +63,11 @@ function DocumentHistory() {
                                         {doc.original_filename}
                                     </td>
                                     <td className="px-4 py-2">{doc.predicted_category}</td>
-                                    <td className="px-4 py-2">
+                                    <td className={`px-4 py-2 ${
+                                        doc.confidence_score >= 0.60 ? 'text-green-600 font-bold' :
+                                        doc.confidence_score >= 0.40 ? 'text-yellow-600' :
+                                        'text-red-600'
+                                    }`}>
                                         {(doc.confidence_score * 100).toFixed(1)}%
                                     </td>
                                     <td className="px-4 py-2">

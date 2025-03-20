@@ -3,7 +3,7 @@ from typing import List
 import os
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Smart Document Classifier"
+    PROJECT_NAME: str = "AI Document Classification"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     
@@ -31,9 +31,9 @@ class Settings(BaseSettings):
     ]
     # Confidence thresholds
     CONFIDENCE_THRESHOLDS: dict = {
-        "high": 0.75,    # Green: 75% and above
-        "medium": 0.50,  # Yellow: 50-75%
-        "low": 0.25      # Red: Below 50%
+        "high": 0.60,    # Green: 60% and above
+        "medium": 0.35,  # Yellow: 35-60%
+        "low": 0.20      # Red: Below 35%
     }
     
     # Security
