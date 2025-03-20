@@ -2,223 +2,149 @@
 
 A modern web application that automatically classifies documents using AI. Built with FastAPI, React, and PostgreSQL.
 
-## ✨ Current Features
+## 🎯 Project Overview
 
-### 🚀 Core Functionality
-- **Smart Upload System**
-  - Drag-and-drop interface
-  - Multi-file upload support
-  - Supports TXT, PDF, and DOCX files
-  - Real-time upload status feedback
+Smart Doc Classifier uses zero-shot classification to automatically categorize documents into predefined categories. It uses the BART-large-MNLI model for intelligent classification while incorporating feature-based adjustments for improved accuracy.
 
-- **AI-Powered Classification**
-  - Uses BART model for zero-shot classification
-  - 6 document categories (Technical, Business, Legal, Academic, General, Other)
-  - Confidence scoring for each classification
-  - Batch processing capability
+### Why BART-large-MNLI?
+- **Zero-shot Capabilities**: No training data required
+- **Robust Performance**: Strong accuracy across diverse document types
+- **Feature Integration**: Easily combines with custom rule-based enhancements
+- **Production Ready**: Stable and well-maintained by Hugging Face
 
-- **Interactive Dashboard**
-  - Total document count
-  - Category distribution visualization
-  - Most common document types
-  - Average documents per category
-  - Auto-refreshing stats (30-second intervals)
+### Classification Categories
+- Technical Documentation
+- Business Proposal
+- Legal Document
+- Academic Paper
+- General Article
+- Other
 
-- **Document History**
-  - Complete upload history
-  - Classification results
-  - Confidence scores
-  - Upload timestamps
+## ✨ Key Features
 
-### 💻 Technical Features
-- FastAPI backend with SQLAlchemy ORM
-- React frontend with Tailwind CSS
-- PostgreSQL database
+### 🚀 Document Processing
+- Drag-and-drop file upload interface
+- Support for TXT, PDF, and DOCX files
+- Intelligent text extraction
+- Automatic chunking for long documents
+- Batch processing capability
+
+### 🤖 ML Pipeline
+- Zero-shot classification using BART
+- Feature-based score adjustments
+- Confidence scoring with three levels:
+  - High (>50%): Strong classification confidence
+  - Medium (30-50%): Reasonable confidence
+  - Low (<30%): Manual review recommended
+- Document structure analysis
+- Title and content-based feature extraction
+
+### 📊 Analytics Dashboard
+- Real-time document statistics
+- Category distribution visualization
+- Confidence score tracking
+- Processing status updates
+- Auto-refreshing (30s intervals)
+
+## 💻 Technical Stack
+
+### Backend
+- FastAPI for API endpoints
+- PostgreSQL with SQLAlchemy ORM
+- Pydantic for data validation
+- Hugging Face Transformers
+- PyPDF2 & python-docx for file processing
+
+### Frontend
+- React with Hooks
+- Tailwind CSS for styling
+- Axios for API communication
 - Real-time error handling
 - Responsive design
 
-## 🔄 Auto-Updating Statistics
-- Live document count
-- Category distribution
-- Confidence level indicators
-- Processing status updates
+## 🛠️ Setup Instructions
 
-## Project Overview
-
-A1 Smart Doc Classifier is designed to help users automatically categorize their documents using advanced machine learning techniques. The application provides a simple, intuitive interface for document upload and classification, making it easy to organize and manage documents based on their content.
-
-### Core Features
-
-- **Document Upload**: Support for text files with drag-and-drop interface
-- **Automatic Classification**: Uses Hugging Face's BART model for zero-shot classification
-- **Document Categories**:
-  - Technical Documentation
-  - Business Proposal
-  - Legal Document
-  - Academic Paper
-  - General Article
-  - Other
-- **Classification Results**: Shows predicted category and confidence scores
-- **Document History**: View and manage previously classified documents
-
-### Technical Stack
-
-#### Backend
-- Node.js + Express
-- PostgreSQL Database
-- Hugging Face Transformers for ML
-- JWT for authentication
-- Multer for file handling
-
-#### Frontend
-- React.js
-- Tailwind CSS for styling
-- Axios for API calls
-- React Router for navigation
-
-## Project Structure
-
-```
-A1_smart_doc_classifier/
-├── backend/
-│   ├── src/
-│   │   ├── config/          # Database and environment configurations
-│   │   ├── controllers/     # Route handlers
-│   │   ├── models/         # Database models
-│   │   ├── routes/         # API routes
-│   │   ├── services/       # Business logic and ML integration
-│   │   └── utils/          # Helper functions
-│   ├── .env                # Environment variables
-│   └── package.json
-└── frontend/
-    ├── src/
-    │   ├── components/     # Reusable React components
-    │   │   ├── DocumentUpload/
-    │   │   ├── ClassificationResult/
-    │   │   └── DocumentList/
-    │   ├── services/       # API integration
-    │   └── App.js
-    └── package.json
-```
-
-## Database Schema
-
-```sql
-CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,
-    filename VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    predicted_category VARCHAR(50) NOT NULL,
-    confidence_score FLOAT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-## API Endpoints
-
-### Document Management
-- `POST /api/documents/upload`
-  - Upload and classify a document
-  - Returns classification result
-
-- `GET /api/documents`
-  - List all classified documents
-  - Supports pagination
-
-## Environment Variables
-
-```env
-# Database
-DB_USER=postgres
-DB_HOST=clann-db-11nov.cfcgo2cma4or.eu-west-1.rds.amazonaws.com
-DB_NAME=postgres
-DB_PASSWORD=ClannPass123!
-DB_PORT=5432
-
-# Server Config
-PORT=3001
-JWT_SECRET=doc_classifier_secret_key_2024
-
-# ML Model
-ML_MODEL_NAME=facebook/bart-large-mnli
-
-# Client URL
-CLIENT_URL=http://localhost:3002
-```
-
-## Development Roadmap
-
-### Phase 1: MVP
-- [x] Basic project structure
-- [ ] Database setup
-- [ ] Backend API implementation
-- [ ] Frontend components
-- [ ] ML model integration
-- [ ] Basic document upload and classification
-
-### Phase 2: Enhancement
-- [ ] User authentication
-- [ ] Enhanced UI/UX
-- [ ] Support for more file types (PDF, DOCX)
-- [ ] Document preview
-- [ ] Batch processing
-- [ ] Statistics dashboard
-
-### Phase 3: Optimization
-- [ ] Performance optimization
-- [ ] Caching implementation
-- [ ] Error handling improvements
-- [ ] Testing suite
-- [ ] Documentation
-
-## Getting Started
-
-1. Clone the repository
-2. Set up environment variables
-3. Install dependencies:
+1. **Clone the Repository**
    ```bash
-   # Backend
-   cd backend
-   npm install
-
-   # Frontend
-   cd ../frontend
-   npm install
+   git clone https://github.com/thomasbradley99/compu.J_webapp.git
+   cd compu.J_webapp
    ```
-4. Start the development servers:
+
+2. **Install Dependencies**
    ```bash
    # Backend
    cd backend
-   npm run dev
+   pip install -r requirements.txt
 
    # Frontend
    cd frontend
-   npm run dev
+   npm install
    ```
 
-## Contributing
+3. **Database Setup**
+   ```bash
+   # Create PostgreSQL database (from project root)
+   psql -U postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'doc_classifier' AND pid <> pg_backend_pid();"
+   psql -U postgres -f backend/db/init.sql
+   ```
 
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
+4. **Start the Application**
+   ```bash
+   # Start backend (from backend directory)
+   uvicorn app.main:app --reload --port 8000
 
-## License
+   # Start frontend (from frontend directory)
+   npm start
+   ```
 
-MIT License
+Note: The application uses default PostgreSQL configuration:
+- Server: localhost
+- User: postgres
+- Database: doc_classifier
+- Port: 5432
 
-## Model Choice Justification
+If you need to modify these settings, they can be found in `backend/app/core/config.py`.
 
-We chose the BART-large-MNLI model for several reasons:
-1. Zero-shot capabilities without training
-2. Good performance on text classification tasks
-3. Reasonable inference speed on CPU
+## 🔄 Error Handling
 
-Trade-offs considered:
-- Speed vs Accuracy: BART offers good accuracy but slower inference
-- Resource Usage: Requires ~2GB RAM, but manageable on most systems
-- Alternative Models:
-  - DeBERTa: Higher accuracy but slower
-  - DistilBERT: Faster but less accurate
-  - TF-IDF + LogReg: Fastest but requires training data 
+The application implements comprehensive error handling:
+
+### Document Processing
+- File type validation
+- Size limit checks (10MB max)
+- Corrupt file detection
+- Text extraction fallbacks
+
+### ML Pipeline
+- Token limit handling through chunking
+- Low confidence warnings
+- Feature extraction error recovery
+- Model fallback options
+
+### API Layer
+- Request validation
+- Database transaction protection
+- Detailed error responses
+- Rate limiting
+
+## 📈 Future Improvements
+
+1. **ML Pipeline**
+   - Implement alternative models for comparison
+   - Add confidence threshold customization
+   - Enhance feature extraction
+
+2. **User Interface**
+   - Add document history sorting/filtering
+   - Implement pagination
+   - Add detailed document preview
+
+3. **Infrastructure**
+   - Add caching layer
+   - Implement user authentication
+   - Add API documentation
+   - Expand test coverage
+
+## 📝 License
+
+MIT License - see LICENSE file for details 
